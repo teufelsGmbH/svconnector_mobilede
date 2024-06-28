@@ -1,5 +1,5 @@
 {
-	"name": "cobweb/svconnector_mobilede",
+	"name": "teufels/svconnector_mobilede",
 	"type": "typo3-cms-extension",
 	"description": "Connector service for XML files or RSS feeds",
 	"license": [
