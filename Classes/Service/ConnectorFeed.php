@@ -184,8 +184,20 @@ class ConnectorFeed extends ConnectorBase
         }
 
         $headers = null;
+        if ((array_key_exists('username', $parameters)) && (array_key_exists('password', $parameters))) {
+            $username = $parameters['username'];
+            $password = $parameters['password'];
+            $auth = base64_encode("$username:$password");
+            if (is_null($headers)) { $headers = []; }
+            $headers = array_merge($headers, [ 'Authorization' => 'Basic ' . $auth]);
+        }
+        if (array_key_exists('accept', $parameters)) {
+            if (is_null($headers)) { $headers = []; }
+            $headers = array_merge($headers, ['Accept' => $parameters['accept']]);
+        }
         if (array_key_exists('useragent', $parameters)) {
-            $headers = array('User-Agent: ' . $parameters['useragent']);
+            if (is_null($headers)) { $headers = []; }
+            $headers = array_merge($headers, ['User-Agent' => $parameters['useragent']]);
         }
 
         $fileUtility = GeneralUtility::makeInstance(FileUtility::class);
