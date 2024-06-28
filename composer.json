@@ -1,11 +1,16 @@
 {
-	"name": "cobweb/svconnector_feed",
+	"name": "cobweb/svconnector_mobilede",
 	"type": "typo3-cms-extension",
 	"description": "Connector service for XML files or RSS feeds",
 	"license": [
 		"GPL-2.0-or-later"
 	],
 	"authors": [
+		{
+			"name": "teufels GmbH",
+			"role": "Developer",
+			"homepage": "https://teufels.com/"
+		},
 		{
 			"name": "Francois Suter",
 			"role": "Developer",
@@ -14,7 +19,7 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"Cobweb\\SvconnectorFeed\\": "Classes/"
+			"Cobweb\\SvconnectorMobilede\\": "Classes/"
 		}
 	},
 	"require": {
@@ -23,11 +28,11 @@
 		"cobweb/svconnector": "^5.0 || ^5.1"
 	},
 	"replace": {
-		"typo3-ter/svconnector_feed": "self.version"
+		"typo3-ter/svconnector_mobilede": "self.version"
 	},
 	"extra": {
 		"typo3/cms": {
-			"extension-key": "svconnector_feed"
+			"extension-key": "svconnector_mobilede"
 		}
 	}
 }

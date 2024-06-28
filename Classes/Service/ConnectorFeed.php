@@ -1,5 +1,5 @@
 <?php
-namespace Cobweb\SvconnectorFeed\Service;
+namespace Cobweb\SvconnectorMobilede\Service;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -22,13 +22,13 @@ use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Service that reads XML feeds for the "svconnector_feed" extension.
+ * Service that reads XML feeds for the "svconnector_mobilede" extension.
  */
 class ConnectorFeed extends ConnectorBase
 {
-    protected string $extensionKey = 'svconnector_feed';
+    protected string $extensionKey = 'svconnector_mobilede';
 
-    protected string $type = 'feed-mobilede';
+    protected string $type = 'mobilede';
 
     public function getType(): string
     {
@@ -73,7 +73,7 @@ class ConnectorFeed extends ConnectorBase
         $result = parent::checkConfiguration($parameters);
         // The "uri" parameter is mandatory
         if (empty($parameters['uri'])) {
-            $result[AbstractMessage::ERROR][] = $this->sL('LLL:EXT:svconnector_feed/Resources/Private/Language/locallang.xlf:no_feed_defined');
+            $result[AbstractMessage::ERROR][] = $this->sL('LLL:EXT:svconnector_mobilede/Resources/Private/Language/locallang.xlf:no_feed_defined');
         }
         return $result;
     }
@@ -204,7 +204,7 @@ class ConnectorFeed extends ConnectorBase
         $data = $fileUtility->getFileContent($parameters['uri'], $headers);
         if ($data === false) {
             $message = sprintf(
-                    $this->sL('LLL:EXT:svconnector_feed/Resources/Private/Language/locallang.xlf:feed_not_fetched'),
+                    $this->sL('LLL:EXT:svconnector_mobilede/Resources/Private/Language/locallang.xlf:feed_not_fetched'),
                     $parameters['uri'],
                     $fileUtility->getError()
             );

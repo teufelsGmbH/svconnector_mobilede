@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cobweb\SvconnectorFeed\Unit\Tests;
+namespace Teufels\SvconnectorMobilede\Unit\Tests;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -18,7 +18,7 @@ namespace Cobweb\SvconnectorFeed\Unit\Tests;
  */
 
 use Cobweb\Svconnector\Domain\Repository\ConnectorRepository;
-use Cobweb\SvconnectorFeed\Service\ConnectorFeed;
+use Cobweb\SvconnectorMobilede\Service\ConnectorFeed;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -29,7 +29,7 @@ class ConnectorFeedTest extends FunctionalTestCase
 {
     protected $testExtensionsToLoad = [
         'typo3conf/ext/svconnector',
-        'typo3conf/ext/svconnector_feed',
+        'typo3conf/ext/svconnector_mobilede',
     ];
 
     protected ConnectorFeed $subject;
@@ -57,7 +57,7 @@ class ConnectorFeedTest extends FunctionalTestCase
         return [
             'UTF-8 data' => [
                 'parameters' => [
-                    'uri' => 'EXT:svconnector_feed/Tests/Functional/Fixtures/data_utf8.xml'
+                    'uri' => 'EXT:svconnector_mobilede/Tests/Functional/Fixtures/data_utf8.xml'
                 ],
                 'result' => <<<EOT
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -71,7 +71,7 @@ EOT
             ],
             'ISO-8859-1 data' => [
                 'parameters' => [
-                    'uri' => 'EXT:svconnector_feed/Tests/Functional/Fixtures/data_latin1.xml',
+                    'uri' => 'EXT:svconnector_mobilede/Tests/Functional/Fixtures/data_latin1.xml',
                     'encoding' => 'iso-8859-1'
                 ],
                 'result' => <<<EOT

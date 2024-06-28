@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="messages" date="2016-04-26T12:14:21Z" product-name="svconnector_feed">
+	<file source-language="en" datatype="plaintext" original="messages" date="2016-04-26T12:14:21Z" product-name="svconnector_mobilede">
 		<header/>
 		<body>
 			<trans-unit id="no_feed_defined" xml:space="preserve">

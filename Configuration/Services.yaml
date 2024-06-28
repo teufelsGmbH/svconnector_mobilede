@@ -5,10 +5,10 @@ services:
     autoconfigure: true
     public: false
 
-  Cobweb\SvconnectorFeed\:
+  Cobweb\SvconnectorMobilede\:
     resource: '../Classes/*'
 
-  Cobweb\SvconnectorFeed\Service\ConnectorFeed:
+  Cobweb\SvconnectorMobilede\Service\ConnectorFeed:
     public: true
     arguments:
       - !tagged_iterator connector.service
