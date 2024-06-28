@@ -28,7 +28,7 @@ class ConnectorFeed extends ConnectorBase
 {
     protected string $extensionKey = 'svconnector_feed';
 
-    protected string $type = 'feed';
+    protected string $type = 'feed-mobilede';
 
     public function getType(): string
     {
