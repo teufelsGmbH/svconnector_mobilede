@@ -4,9 +4,12 @@
 [![Daily Downloads](http://poser.pugx.org/cobweb/svconnector_feed/d/daily)](https://packagist.org/packages/cobweb/svconnector_mobilede)
 [![PHP Version Require](http://poser.pugx.org/cobweb/svconnector_feed/require/php)](https://packagist.org/packages/cobweb/svconnector_mobilede)
 
-# Connector service - XML Feed
+# Connector service - mobile.de (new XML Feed)
 
-This service provides a simple API for reading XML sources (local or remote) and return their content
+This service is a copy of svconnector_feed and provides a simple API for reading mobile.de Search API new XML source and return their content
 as a PHP array or an XML structure.
 
-Read the manual for more details: https://docs.typo3.org/typo3cms/extensions/svconnector_mobilede/
+Read the manual for more details: https://docs.typo3.org/typo3cms/extensions/svconnector_feed/
+
+## ToDo:
+- handle pagination when there are more than 100 resutls
