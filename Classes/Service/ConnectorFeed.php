@@ -203,23 +203,25 @@ class ConnectorFeed extends ConnectorBase
         $fileUtility = GeneralUtility::makeInstance(FileUtility::class);
         $data = $fileUtility->getFileContent($parameters['uri'], $headers);
 
-        //fetch ad detail data from mobile.de
-        $xml = simplexml_load_string($data);
-        if ($xml != false) {
-            foreach ($xml->ads->ad as $ad) {
-                $mobileAdId = (string)$ad->mobileAdId;
-                $adUrl = "https://services.mobile.de/search-api/ad/{$mobileAdId}";
-                $adData = $fileUtility->getFileContent($adUrl, $headers);
-                $adXml = simplexml_load_string($adData);
-
-                // Overwrite <ad> with new data from ad detail
-                $domAd = dom_import_simplexml($ad);
-                $domAdNew = dom_import_simplexml($adXml);
-                $domAd->parentNode->replaceChild($domAd->ownerDocument->importNode($domAdNew, true), $domAd);
+        if(isset($parameters['get-detail']) && $parameters['get-detail'] === true) {
+             //fetch ad detail data from mobile.de
+            $xml = simplexml_load_string($data);
+            if ($xml != false) {
+                foreach ($xml->ads->ad as $ad) {
+                    $mobileAdId = (string)$ad->mobileAdId;
+                    $adUrl = "https://services.mobile.de/search-api/ad/{$mobileAdId}";
+                    $adData = $fileUtility->getFileContent($adUrl, $headers);
+                    $adXml = simplexml_load_string($adData);
+    
+                    // Overwrite <ad> with new data from ad detail
+                    $domAd = dom_import_simplexml($ad);
+                    $domAdNew = dom_import_simplexml($adXml);
+                    $domAd->parentNode->replaceChild($domAd->ownerDocument->importNode($domAdNew, true), $domAd);
+                }
+    
+                $detail_data = $xml->asXML();
+                $data = $detail_data;
             }
-
-            $detail_data = $xml->asXML();
-            $data = $detail_data;
         }
         
         if ($data === false) {
