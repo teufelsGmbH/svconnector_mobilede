@@ -161,7 +161,6 @@ class ConnectorFeed extends ConnectorBase
      */
     protected function query(array $parameters = [])
     {
-
         $this->logger->info('Call parameters', $parameters);
         // Check the configuration
         $problems = $this->checkConfiguration($parameters);
@@ -204,26 +203,28 @@ class ConnectorFeed extends ConnectorBase
         $data = $fileUtility->getFileContent($parameters['uri'], $headers);
 
         if(isset($parameters['get-detail']) && $parameters['get-detail'] === true) {
-             //fetch ad detail data from mobile.de
-            $xml = simplexml_load_string($data);
-            if ($xml != false) {
-                foreach ($xml->ads->ad as $ad) {
-                    $mobileAdId = (string)$ad->mobileAdId;
-                    $adUrl = "https://services.mobile.de/search-api/ad/{$mobileAdId}";
-                    $adData = $fileUtility->getFileContent($adUrl, $headers);
-                    $adXml = simplexml_load_string($adData);
-    
-                    // Overwrite <ad> with new data from ad detail
-                    $domAd = dom_import_simplexml($ad);
-                    $domAdNew = dom_import_simplexml($adXml);
-                    $domAd->parentNode->replaceChild($domAd->ownerDocument->importNode($domAdNew, true), $domAd);
-                }
-    
-                $detail_data = $xml->asXML();
-                $data = $detail_data;
+            // fetch ad detail data from mobile.de
+            $doc = new \DOMDocument();
+            $doc->loadXML($data);
+            $xpath = new \DOMXPath($doc);
+
+            $ads = $xpath->query("//ads/ad");
+            foreach ($ads as $index => $ad) {
+                $mobileAdId = $ad->getElementsByTagName('mobileAdId')->item(0)->nodeValue;
+                $adUrl = "https://services.mobile.de/search-api/ad/{$mobileAdId}";
+
+                $adData = $fileUtility->getFileContent($adUrl, $headers);
+                $adDoc = new \DOMDocument();
+                $adDoc->loadXML($adData);
+
+                // Overwrite <ad> with new data from ad detail
+                $newAd = $doc->importNode($adDoc->documentElement, true);
+                $ad->parentNode->replaceChild($newAd, $ad);
             }
+
+            $data = $doc->saveXML();
         }
-        
+
         if ($data === false) {
             $message = sprintf(
                     $this->sL('LLL:EXT:svconnector_mobilede/Resources/Private/Language/locallang.xlf:feed_not_fetched'),
