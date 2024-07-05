@@ -210,10 +210,6 @@ class ConnectorFeed extends ConnectorBase
             $data = $this->transformFieldsToEquipments($data, $parameters['equipment-fields']);
         }
 
-        // Debug: Save transformed XML to file
-        $debugFilePath = '/app/vendor/teufels/svconnector_mobilede/Resources/Public/Debug/transformed_data.xml';
-        file_put_contents($debugFilePath, $data);
-
         if ($data === false) {
             $message = sprintf(
                     $this->sL('LLL:EXT:svconnector_mobilede/Resources/Private/Language/locallang.xlf:feed_not_fetched'),
