@@ -206,6 +206,14 @@ class ConnectorFeed extends ConnectorBase
             $data = $this->fetchAdDetails($data, $headers);
         }
 
+        if (isset($parameters['equipment-fields']) && is_string($parameters['equipment-fields'])) {
+            $data = $this->transformFieldsToEquipments($data, $parameters['equipment-fields']);
+        }
+
+        // Debug: Save transformed XML to file
+        $debugFilePath = '/app/vendor/teufels/svconnector_mobilede/Resources/Public/Debug/transformed_data.xml';
+        file_put_contents($debugFilePath, $data);
+
         if ($data === false) {
             $message = sprintf(
                     $this->sL('LLL:EXT:svconnector_mobilede/Resources/Private/Language/locallang.xlf:feed_not_fetched'),
@@ -274,6 +282,55 @@ class ConnectorFeed extends ConnectorBase
             // Overwrite <ad> with new data from ad detail
             $newAd = $doc->importNode($adDoc->documentElement, true);
             $ad->parentNode->replaceChild($newAd, $ad);
+        }
+
+        return $doc->saveXML();
+    }
+
+    /**
+     * Transforms specified fields to equipment format in the XML data.
+     *
+     * @param string $data The XML data.
+     * @param string $fields The fields to transform as a comma-separated string.
+     * @return string Updated XML data with transformed fields.
+     */
+    protected function transformFieldsToEquipments(string $data, string $fields): string
+    {
+        $fieldsArray = explode(',', $fields);
+
+        $doc = new \DOMDocument();
+        $doc->loadXML($data);
+        $xpath = new \DOMXPath($doc);
+
+        foreach ($xpath->query("//ads/ad") as $ad) {
+            $equipmentsElement = $doc->createElement('equipments');
+
+            foreach ($fieldsArray as $field) {
+                $nodes = $xpath->query("{$field}", $ad);
+                foreach ($nodes as $node) {
+                    $equipmentElement = $doc->createElement('equipment');
+                    $codeElement = $doc->createElement('code', $field);
+
+                    if ($node->getElementsByTagName('value')->length > 0) {
+                        $values = [];
+                        foreach ($node->getElementsByTagName('value') as $valueNode) {
+                            $values[] = $valueNode->nodeValue;
+                        }
+                        $valueElement = $doc->createElement('value', implode(',', $values));
+                    } else {
+                        $valueElement = $doc->createElement('value', $node->nodeValue);
+                    }
+
+                    $equipmentElement->appendChild($codeElement);
+                    $equipmentElement->appendChild($valueElement);
+                    $equipmentsElement->appendChild($equipmentElement);
+
+                    // Remove the old node
+                    $node->parentNode->removeChild($node);
+                }
+            }
+
+            $ad->appendChild($equipmentsElement);
         }
 
         return $doc->saveXML();
