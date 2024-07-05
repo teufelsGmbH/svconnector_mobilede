@@ -203,26 +203,7 @@ class ConnectorFeed extends ConnectorBase
         $data = $fileUtility->getFileContent($parameters['uri'], $headers);
 
         if(isset($parameters['get-detail']) && $parameters['get-detail'] === true) {
-            // fetch ad detail data from mobile.de
-            $doc = new \DOMDocument();
-            $doc->loadXML($data);
-            $xpath = new \DOMXPath($doc);
-
-            $ads = $xpath->query("//ads/ad");
-            foreach ($ads as $index => $ad) {
-                $mobileAdId = $ad->getElementsByTagName('mobileAdId')->item(0)->nodeValue;
-                $adUrl = "https://services.mobile.de/search-api/ad/{$mobileAdId}";
-
-                $adData = $fileUtility->getFileContent($adUrl, $headers);
-                $adDoc = new \DOMDocument();
-                $adDoc->loadXML($adData);
-
-                // Overwrite <ad> with new data from ad detail
-                $newAd = $doc->importNode($adDoc->documentElement, true);
-                $ad->parentNode->replaceChild($newAd, $ad);
-            }
-
-            $data = $doc->saveXML();
+            $data = $this->fetchAdDetails($data, $headers);
         }
 
         if ($data === false) {
@@ -266,4 +247,36 @@ class ConnectorFeed extends ConnectorBase
         // Return the result
         return $data;
     }
+
+    /**
+     * Fetches detailed ad data from mobile.de and updates the XML document.
+     *
+     * @param string $data The XML data.
+     * @param array $headers The headers for the HTTP request.
+     * @return string Updated XML data with ad details.
+     */
+    protected function fetchAdDetails(string $data, array $headers): string
+    {
+        $fileUtility = GeneralUtility::makeInstance(FileUtility::class);
+        $doc = new \DOMDocument();
+        $doc->loadXML($data);
+        $xpath = new \DOMXPath($doc);
+
+        $ads = $xpath->query("//ads/ad");
+        foreach ($ads as $index => $ad) {
+            $mobileAdId = $ad->getElementsByTagName('mobileAdId')->item(0)->nodeValue;
+            $adUrl = "https://services.mobile.de/search-api/ad/{$mobileAdId}";
+
+            $adData = $fileUtility->getFileContent($adUrl, $headers);
+            $adDoc = new \DOMDocument();
+            $adDoc->loadXML($adData);
+
+            // Overwrite <ad> with new data from ad detail
+            $newAd = $doc->importNode($adDoc->documentElement, true);
+            $ad->parentNode->replaceChild($newAd, $ad);
+        }
+
+        return $doc->saveXML();
+    }
+
 }
