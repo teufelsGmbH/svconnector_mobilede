@@ -199,8 +199,8 @@ class ConnectorFeed extends ConnectorBase
             $headers = array_merge($headers, ['User-Agent' => $parameters['useragent']]);
         }
 
-        $fileUtility = GeneralUtility::makeInstance(FileUtility::class);
-        $data = $fileUtility->getFileContent($parameters['uri'], $headers);
+        // fetch all data from all pages
+        $data = $this->fetchAllPages($parameters['uri'], $headers);
 
         if(isset($parameters['get-detail']) && $parameters['get-detail'] === true) {
             $data = $this->fetchAdDetails($data, $headers);
@@ -252,6 +252,64 @@ class ConnectorFeed extends ConnectorBase
         return $data;
     }
 
+    /**
+     * Fetches all data from mobile.de from all pages.
+     *
+     * @param string $uri Address of the file to read
+     * @param array $headers Headers to pass on to the request
+     * @return string XML string with all ad(s) from all pages
+     */
+    private function fetchAllPages(string $uri, array $headers): string
+    {
+        $fileUtility = GeneralUtility::makeInstance(FileUtility::class);
+        $allAds = '';
+        $total = 0;
+        $currentPage = 1;
+        $maxPages = 1;
+
+        do {
+            // Update the URI with the current page number
+            $separator = (strpos($uri, '?') === false) ? '?' : '&';
+            $pageUri = $uri . $separator . 'page.number=' . $currentPage;
+
+            $pageData = $fileUtility->getFileContent($pageUri, $headers);
+
+            if ($pageData === false) {
+                throw new SourceErrorException('Error fetching data from URI: ' . $pageUri);
+            }
+
+            // Parse the XML data
+            $xml = simplexml_load_string($pageData);
+            if ($xml === false) {
+                throw new SourceErrorException('Error parsing XML data from URI: ' . $pageUri);
+            }
+
+            // Extract total from the first page
+            if ($currentPage === 1) {
+                $total = (int)$xml->total;
+            }
+
+            // Append all <ad> elements to $allAds
+            foreach ($xml->ads->ad as $ad) {
+                $allAds .= $ad->asXML();
+            }
+
+            // Get pagination information
+            $currentPage = (int)$xml->currentPage;
+            $maxPages = (int)$xml->maxPages;
+
+            $currentPage++;
+        } while ($currentPage <= $maxPages);
+
+        // Construct the XML
+        $allPagesDataXml = '<searchResult>';
+        $allPagesDataXml .= '<total>' . $total . '</total>';
+        $allPagesDataXml .= '<ads>' . $allAds . '</ads>';
+        $allPagesDataXml .= '</searchResult>';
+
+        return $allPagesDataXml;
+    }
+    
     /**
      * Fetches detailed ad data from mobile.de and updates the XML document.
      *
