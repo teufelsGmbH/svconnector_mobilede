@@ -10,6 +10,3 @@ This service is a copy of svconnector_feed and provides a simple API for reading
 as a PHP array or an XML structure.
 
 Read the manual for more details: https://docs.typo3.org/typo3cms/extensions/svconnector_feed/
-
-## ToDo:
-- handle pagination when there are more than 100 resutls
