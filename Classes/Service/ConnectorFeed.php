@@ -362,22 +362,27 @@ class ConnectorFeed extends ConnectorBase
             foreach ($fieldsArray as $field) {
                 $nodes = $xpath->query("{$field}", $ad);
                 foreach ($nodes as $node) {
-                    $equipmentElement = $doc->createElement('equipment');
-                    $codeElement = $doc->createElement('code', $field);
-
+                    $values = [];
                     if ($node->getElementsByTagName('value')->length > 0) {
-                        $values = [];
                         foreach ($node->getElementsByTagName('value') as $valueNode) {
                             $values[] = $valueNode->nodeValue;
                         }
-                        $valueElement = $doc->createElement('value', implode(',', $values));
                     } else {
-                        $valueElement = $doc->createElement('value', $node->nodeValue);
+                        $values[] = $node->nodeValue;
                     }
 
-                    $equipmentElement->appendChild($codeElement);
-                    $equipmentElement->appendChild($valueElement);
-                    $equipmentsElement->appendChild($equipmentElement);
+                    foreach ($values as $value) {
+                        $equipmentElement = $doc->createElement('equipment');
+                        $codeElement = $doc->createElement('code', $field);
+                        $valueElement = $doc->createElement('value', $value);
+                        $externalIdValue = ($value === 'true') ? $field : "{$field}.{$value}";
+                        $externalIdElement = $doc->createElement('external_id', $externalIdValue);
+
+                        $equipmentElement->appendChild($codeElement);
+                        $equipmentElement->appendChild($valueElement);
+                        $equipmentElement->appendChild($externalIdElement);
+                        $equipmentsElement->appendChild($equipmentElement);
+                    }
 
                     // Remove the old node
                     $node->parentNode->removeChild($node);
