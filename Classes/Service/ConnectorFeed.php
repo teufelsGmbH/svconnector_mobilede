@@ -358,6 +358,7 @@ class ConnectorFeed extends ConnectorBase
 
         foreach ($xpath->query("//ads/ad") as $ad) {
             $equipmentsElement = $doc->createElement('equipments');
+            $externalIds = [];
 
             foreach ($fieldsArray as $field) {
                 $nodes = $xpath->query("{$field}", $ad);
@@ -382,6 +383,9 @@ class ConnectorFeed extends ConnectorBase
                         $equipmentElement->appendChild($valueElement);
                         $equipmentElement->appendChild($externalIdElement);
                         $equipmentsElement->appendChild($equipmentElement);
+
+                        // Add external_id to the collection
+                        $externalIds[] = $externalIdValue;
                     }
 
                     // Remove the old node
@@ -389,7 +393,12 @@ class ConnectorFeed extends ConnectorBase
                 }
             }
 
+            // Create equipmentCollection element
+            $equipmentCollectionElement = $doc->createElement('equipmentCollection', implode(',', $externalIds));
+
+            // Append equipmentCollection element after equipments element
             $ad->appendChild($equipmentsElement);
+            $ad->appendChild($equipmentCollectionElement);
         }
 
         return $doc->saveXML();
