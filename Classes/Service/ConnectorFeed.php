@@ -42,12 +42,12 @@ class ConnectorFeed extends ConnectorBase
      */
     public function __toString()
     {
-        return 'ConnectorFeed';
+        return 'ConnectorMobilede';
     }
 
     public function getName(): string
     {
-        return 'XML/RSS feed connector';
+        return 'mobile.de XML feed connector';
     }
 
     /**
