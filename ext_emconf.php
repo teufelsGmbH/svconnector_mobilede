@@ -9,8 +9,8 @@ $EM_CONF[$_EXTKEY] = [
     'uploadfolder' => 0,
     'createDirs' => '',
     'clearcacheonload' => 1,
-    'author' => 'Francois Suter (Idéative)',
-    'author_email' => 'typo3@ideative.ch',
+    'author' => 'Francois Suter (Idéative), Bastian Holzemn (teufels GmbH)',
+    'author_email' => 'typo3@ideative.ch, digital@teufels.com',
     'author_company' => '',
     'constraints' =>
         [
