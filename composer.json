@@ -1,7 +1,7 @@
 {
 	"name": "teufels/svconnector_mobilede",
 	"type": "typo3-cms-extension",
-	"description": "Connector service for XML files or RSS feeds",
+	"description": "Connector service for mobile.de Search API XML Feed",
 	"license": [
 		"GPL-2.0-or-later"
 	],
