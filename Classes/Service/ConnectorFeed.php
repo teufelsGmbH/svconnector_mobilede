@@ -15,7 +15,7 @@ declare(strict_types=1);
  * The TYPO3 project - inspiring people to share!
  */
 
-namespace Cobweb\SvconnectorFeed\Service;
+namespace Cobweb\SvconnectorMobilede\Service;
 
 use Cobweb\Svconnector\Attribute\AsConnectorService;
 use Cobweb\Svconnector\Event\ProcessArrayDataEvent;
