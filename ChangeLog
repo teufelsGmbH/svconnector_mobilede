@@ -1,3 +1,7 @@
+2025-08-29 Bastian Holzem (teufels GmbH)  <digital@teufels.com>
+
+    * add support for TYPO3 13 LTS
+
 2024-06-28 Bastian Holzem (teufels GmbH)  <digital@teufels.com>
 
 	* extension svconnector_feed for mobile.de Search API
