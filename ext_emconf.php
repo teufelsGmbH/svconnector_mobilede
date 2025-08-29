@@ -4,7 +4,7 @@ $EM_CONF[$_EXTKEY] = [
     'title' => 'Connector service - XML Feed (mobile.de)',
     'description' => 'Connector service for mobile.de Search API XML Feed',
     'category' => 'services',
-    'version' => '4.3.2-mobile.de',
+    'version' => '5.0.0-mobile.de',
     'state' => 'stable',
     'uploadfolder' => 0,
     'createDirs' => '',
@@ -16,8 +16,8 @@ $EM_CONF[$_EXTKEY] = [
         [
             'depends' =>
                 [
-                    'typo3' => '11.5.0-12.4.99',
-                    'svconnector' => '5.0.0-0.0.0',
+                    'typo3' => '12.4.0-13.4.99',
+                    'svconnector' => '6.0.0-0.0.0',
                 ],
             'conflicts' =>
                 [
