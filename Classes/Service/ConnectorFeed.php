@@ -1,5 +1,6 @@
 <?php
-namespace Cobweb\SvconnectorMobilede\Service;
+
+declare(strict_types=1);
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -14,48 +15,34 @@ namespace Cobweb\SvconnectorMobilede\Service;
  * The TYPO3 project - inspiring people to share!
  */
 
+namespace Cobweb\SvconnectorMobilede\Service;
+
+use Cobweb\Svconnector\Attribute\AsConnectorService;
+use Cobweb\Svconnector\Event\ProcessArrayDataEvent;
+use Cobweb\Svconnector\Event\ProcessRawDataEvent;
+use Cobweb\Svconnector\Event\ProcessResponseEvent;
+use Cobweb\Svconnector\Event\ProcessXmlDataEvent;
 use Cobweb\Svconnector\Exception\SourceErrorException;
 use Cobweb\Svconnector\Service\ConnectorBase;
 use Cobweb\Svconnector\Utility\ConnectorUtility;
 use Cobweb\Svconnector\Utility\FileUtility;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Service that reads XML feeds for the "svconnector_mobilede" extension.
  */
+#[AsConnectorService(type: 'mobilede', name: 'mobile.de connector')]
 class ConnectorFeed extends ConnectorBase
 {
     protected string $extensionKey = 'svconnector_mobilede';
-
-    protected string $type = 'mobilede';
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    /**
-     * Returns the class as a string. Seems to be needed by phpunit when an exception occurs during a test run.
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return 'ConnectorMobilede';
-    }
-
-    public function getName(): string
-    {
-        return 'mobile.de XML feed connector';
-    }
 
     /**
      * Verifies that the connection is functional
      * In the case of this service, it is always the case
      * It might fail for a specific file, but it is always available in general
      *
-     * @return boolean TRUE if the service is available
+     * @return bool TRUE if the service is available
      */
     public function isAvailable(): bool
     {
@@ -70,10 +57,12 @@ class ConnectorFeed extends ConnectorBase
      */
     public function checkConfiguration(array $parameters = []): array
     {
-        $result = parent::checkConfiguration($parameters);
+        $result = parent::checkConfiguration(...func_get_args());
         // The "uri" parameter is mandatory
-        if (empty($parameters['uri'])) {
-            $result[AbstractMessage::ERROR][] = $this->sL('LLL:EXT:svconnector_mobilede/Resources/Private/Language/locallang.xlf:no_feed_defined');
+        if (empty($this->parameters['uri'])) {
+            $result[ContextualFeedbackSeverity::ERROR->value][] = $this->sL(
+                'LLL:EXT:svconnector_mobilede/Resources/Private/Language/locallang.xlf:no_feed_defined'
+            );
         }
         return $result;
     }
@@ -88,17 +77,28 @@ class ConnectorFeed extends ConnectorBase
      */
     public function fetchRaw(array $parameters = [])
     {
-        $result = $this->query($parameters);
+        // Call to parent is used only to raise flag about argument deprecation
+        // TODO: remove once method signature is changed in next major version
+        parent::fetchRaw(...func_get_args());
+
+        $result = $this->query();
         // Implement post-processing hook
         $hooks = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][$this->extensionKey]['processRaw'] ?? null;
-        if (is_array($hooks)) {
+        if (is_array($hooks) && count($hooks) > 0) {
+            trigger_error(
+                'Using the processRaw hook is deprecated. Use the ProcessRawDataEvent instead',
+                E_USER_DEPRECATED
+            );
             foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][$this->extensionKey]['processRaw'] as $className) {
                 $processor = GeneralUtility::makeInstance($className);
                 $result = $processor->processRaw($result, $this);
             }
         }
-
-        return $result;
+        /** @var ProcessRawDataEvent $event */
+        $event = $this->eventDispatcher->dispatch(
+            new ProcessRawDataEvent($result, $this)
+        );
+        return $event->getData();
     }
 
     /**
@@ -110,18 +110,30 @@ class ConnectorFeed extends ConnectorBase
      */
     public function fetchXML(array $parameters = []): string
     {
+        // Call to parent is used only to raise flag about argument deprecation
+        // TODO: remove once method signature is changed in next major version
+        parent::fetchXML(...func_get_args());
+
         // Get the feed, which is already in XML
-        $xml = $this->query($parameters);
+        $xml = $this->query();
         // Implement post-processing hook
         $hooks = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][$this->extensionKey]['processXML'] ?? null;
-        if (is_array($hooks)) {
+        if (is_array($hooks) && count($hooks) > 0) {
+            trigger_error(
+                'Using the processXML hook is deprecated. Use the ProcessXmlDataEvent instead',
+                E_USER_DEPRECATED
+            );
             foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][$this->extensionKey]['processXML'] as $className) {
                 $processor = GeneralUtility::makeInstance($className);
                 $xml = $processor->processXML($xml, $this);
             }
         }
+        /** @var ProcessXmlDataEvent $event */
+        $event = $this->eventDispatcher->dispatch(
+            new ProcessXmlDataEvent($xml, $this)
+        );
 
-        return $xml;
+        return $event->getData();
     }
 
     /**
@@ -133,21 +145,33 @@ class ConnectorFeed extends ConnectorBase
      */
     public function fetchArray(array $parameters = []): array
     {
+        // Call to parent is used only to raise flag about argument deprecation
+        // TODO: remove once method signature is changed in next major version
+        parent::fetchArray(...func_get_args());
+
         // Get the data from the file
-        $result = $this->query($parameters);
+        $result = $this->query();
         $result = ConnectorUtility::convertXmlToArray($result);
 
         $this->logger->info('Structured data', $result);
 
         // Implement post-processing hook
         $hooks = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][$this->extensionKey]['processArray'] ?? null;
-        if (is_array($hooks)) {
+        if (is_array($hooks) && count($hooks) > 0) {
+            trigger_error(
+                'Using the processArray hook is deprecated. Use the ProcessArrayDataEvent instead',
+                E_USER_DEPRECATED
+            );
             foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][$this->extensionKey]['processArray'] as $className) {
                 $processor = GeneralUtility::makeInstance($className);
                 $result = $processor->processArray($result, $this);
             }
         }
-        return $result;
+        /** @var ProcessArrayDataEvent $event */
+        $event = $this->eventDispatcher->dispatch(
+            new ProcessArrayDataEvent($result, $this)
+        );
+        return $event->getData();
     }
 
     /**
@@ -161,77 +185,84 @@ class ConnectorFeed extends ConnectorBase
      */
     protected function query(array $parameters = [])
     {
-        $this->logger->info('Call parameters', $parameters);
+        // Call to parent is used only to raise flag about argument deprecation
+        // TODO: remove once method signature is changed in next major version
+        parent::query(...func_get_args());
+
+        $this->logger->info('Call parameters', $this->parameters);
         // Check the configuration
-        $problems = $this->checkConfiguration($parameters);
+        $problems = $this->checkConfiguration();
         // Log all issues and raise error if any
         $this->logConfigurationCheck($problems);
-        if (count($problems[AbstractMessage::ERROR]) > 0) {
+        if (count($problems[ContextualFeedbackSeverity::ERROR->value]) > 0) {
             $message = '';
-            foreach ($problems[AbstractMessage::ERROR] as $problem) {
+            foreach ($problems[ContextualFeedbackSeverity::ERROR->value] as $problem) {
                 if ($message !== '') {
                     $message .= "\n";
                 }
                 $message .= $problem;
             }
             $this->raiseError(
-                    $message,
-                    1299257883,
-                    [],
-                    SourceErrorException::class
+                $message,
+                1299257883,
+                [],
+                SourceErrorException::class
             );
         }
 
-        $headers = null;
-        if ((array_key_exists('username', $parameters)) && (array_key_exists('password', $parameters))) {
-            $username = $parameters['username'];
-            $password = $parameters['password'];
+        $headers = $this->parameters['headers'] ?? [];
+        if ((array_key_exists('username', $this->parameters)) && (array_key_exists('password', $this->parameters))) {
+            $username = $this->parameters['username'];
+            $password = $this->parameters['password'];
             $auth = base64_encode("$username:$password");
             if (is_null($headers)) { $headers = []; }
             $headers = array_merge($headers, [ 'Authorization' => 'Basic ' . $auth]);
         }
-        if (array_key_exists('accept', $parameters)) {
+        if (array_key_exists('accept', $this->parameters)) {
             if (is_null($headers)) { $headers = []; }
-            $headers = array_merge($headers, ['Accept' => $parameters['accept']]);
+            $headers = array_merge($headers, ['Accept' => $this->parameters['accept']]);
         }
-        if (array_key_exists('useragent', $parameters)) {
-            if (is_null($headers)) { $headers = []; }
-            $headers = array_merge($headers, ['User-Agent' => $parameters['useragent']]);
+        if (array_key_exists('useragent', $this->parameters)) {
+            trigger_error(
+                '"useragent" property is deprecated. Use headers property instead.',
+                E_USER_DEPRECATED
+            );
+            $headers = array_merge($headers, ['User-Agent' => $this->parameters['useragent']]);
         }
 
         // fetch all data from all pages
-        $data = $this->fetchAllPages($parameters['uri'], $headers);
+        $data = $this->fetchAllPages($this->parameters['uri'], $headers);
 
-        if(isset($parameters['get-detail']) && $parameters['get-detail'] === true) {
+        if(isset($parameters['get-detail']) && $this->parameters['get-detail'] === true) {
             $data = $this->fetchAdDetails($data, $headers);
         }
 
-        if (isset($parameters['equipment-fields']) && is_string($parameters['equipment-fields'])) {
-            $data = $this->transformFieldsToEquipments($data, $parameters['equipment-fields']);
+        if (isset($parameters['equipment-fields']) && is_string($this->parameters['equipment-fields'])) {
+            $data = $this->transformFieldsToEquipments($data, $this->parameters['equipment-fields']);
         }
 
         if ($data === false) {
             $message = sprintf(
                     $this->sL('LLL:EXT:svconnector_mobilede/Resources/Private/Language/locallang.xlf:feed_not_fetched'),
-                    $parameters['uri'],
+                    $this->parameters['uri'],
                     $fileUtility->getError()
             );
             $this->raiseError(
-                    $message,
-                    1299257894,
-                    [],
-                    SourceErrorException::class
+                $message,
+                1299257894,
+                [],
+                SourceErrorException::class
             );
         }
         // Check if the current charset is the same as the file encoding
         // Don't do the check if no encoding was defined
         // TODO: add automatic encoding detection by reading the encoding attribute in the XML header
-        if (empty($parameters['encoding'])) {
+        if (empty($this->parameters['encoding'])) {
             $encoding = '';
             $isSameCharset = true;
         } else {
             // Standardize charset name and compare
-            $encoding = $parameters['encoding'];
+            $encoding = $this->parameters['encoding'];
             $isSameCharset = $this->getCharset() === $encoding;
         }
         // If the charset is not the same, convert data
@@ -241,15 +272,23 @@ class ConnectorFeed extends ConnectorBase
 
         // Process the result if any hook is registered
         $hooks = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][$this->extensionKey]['processResponse'] ?? null;
-        if (is_array($hooks)) {
+        if (is_array($hooks) && count($hooks) > 0) {
+            trigger_error(
+                'Using the processResponse hook is deprecated. Use the ProcessResponseEvent instead',
+                E_USER_DEPRECATED
+            );
             foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'][$this->extensionKey]['processResponse'] as $className) {
                 $processor = GeneralUtility::makeInstance($className);
                 $data = $processor->processResponse($data, $this);
             }
         }
+        /** @var ProcessResponseEvent $event */
+        $event = $this->eventDispatcher->dispatch(
+            new ProcessResponseEvent($data, $this)
+        );
 
         // Return the result
-        return $data;
+        return $event->getResponse();
     }
 
     /**
