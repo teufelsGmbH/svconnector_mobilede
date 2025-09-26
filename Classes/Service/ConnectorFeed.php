@@ -233,11 +233,11 @@ class ConnectorFeed extends ConnectorBase
         // fetch all data from all pages
         $data = $this->fetchAllPages($this->parameters['uri'], $headers);
 
-        if(isset($parameters['get-detail']) && $this->parameters['get-detail'] === true) {
+        if(isset($this->parameters['get-detail']) && $this->parameters['get-detail'] === true) {
             $data = $this->fetchAdDetails($data, $headers);
         }
 
-        if (isset($parameters['equipment-fields']) && is_string($this->parameters['equipment-fields'])) {
+        if (isset($this->parameters['equipment-fields']) && is_string($this->parameters['equipment-fields'])) {
             $data = $this->transformFieldsToEquipments($data, $this->parameters['equipment-fields']);
         }
 
